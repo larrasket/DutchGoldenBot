@@ -11,7 +11,7 @@
 #+TEXINFO_DIR_TITLE: DutchGoldenBot
 #+TEXINFO_DIR_DESC: DutchGoldenBot
 
-#+HTML: <img src="images/logo-128px.png" align="right">
+#+HTML: <img src="logo.png" align="right">
 
 The DutchGoldenBot is a simple go script-like program for managing social media accounts of,
 [[https://www.facebook.com/DutchGoldenAge][@DutchGoldenAge]], [[https://twitter.com/DutchGoldenAge_][DutchGoldenAge_]], and [[https://twitter.com/DutchGoldenBot][@DutchGoldenBot]] using Twitter V2 and Facebook

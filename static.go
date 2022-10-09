@@ -9,10 +9,14 @@ type Token struct {
 	TWbotSEC string `json:"tw_bot_sec"`
 	TWcon    string `json:"tw_consum"`
 	TWconSEC string `json:"tw_consum_sec"`
+	TWid     string `json:"twitter_id"`
 }
 
 const (
-	secertFile     = "secret.json"
-	ErrReadingJson = "Error occurred during reading JSON:"
-	ErrPostingFB   = "Error occurred during posting to Facebook:"
+	secertFile        = "secret.json"
+	ErrReadingJson    = "Error occurred during reading JSON:"
+	ErrPostingFB      = "Error occurred during posting to Facebook:"
+	ErrPostingTW      = "Error occurred during posting to Twitter:"
+	ErrReadingPost    = "Error occurred during reading post content:"
+	ErrPostingTWReply = "Error occurred during posting twitter reply:"
 )

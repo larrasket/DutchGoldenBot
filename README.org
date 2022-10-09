@@ -1,0 +1,53 @@
+#+TITLE: DutchGoldenBot
+
+#+PROPERTY: LOGGING nil
+
+# Export options.
+#+OPTIONS: broken-links:t *:t
+
+# Info export options.
+#+EXPORT_FILE_NAME: DutchGoldenBot
+#+TEXINFO_DIR_CATEGORY: DutchGoldenBot
+#+TEXINFO_DIR_TITLE: DutchGoldenBot
+#+TEXINFO_DIR_DESC: DutchGoldenBot
+
+#+HTML: <img src="images/logo-128px.png" align="right">
+
+The DutchGoldenBot is a simple go script-like program for managing social media accounts of,
+[[https://www.facebook.com/DutchGoldenAge][@DutchGoldenAge]], [[https://twitter.com/DutchGoldenAge_][DutchGoldenAge_]], and [[https://twitter.com/DutchGoldenBot][@DutchGoldenBot]] using Twitter V2 and Facebook
+GraphAPI.
+
+
+* Authentication File
+
+To authenticate you have to maintain a file that contains the following data: facebook
+access token, Facebook page id, twitter consumer token, twitter consumer secret and both
+twitter access token and access secret for each twitter account. The file structure should
+looks like the following:
+#+begin_src json
+{
+  "facebook_token": "",
+  "facebook_page_id": "",
+  "tw_token": "",
+  "tw_sec": "",
+  "tw_bot_token": "",
+  "tw_bot_sec": "",
+  "tw_consum": "",
+  "tw_consum_sec": "",
+  "twitter_id": ""
+}
+#+end_src
+
+You can get Facebook tokens easily from [[https://developers.facebook.com/tools/explorer/][Facebook Graph Explorer Tool]], and it have to have
+the following permissions: ~pages_show_list~, ~pages_messaging~, ~pages_read_engagement~,
+~pages_read_user_content~, ~pages_manage_posts~ and ~pages_manage_engagement~. *Please note*
+that [[https://developers.facebook.com/docs/permissions/reference/pages_manage_posts/][some]] of these permissions may require business verifications.
+
+Also note that all of Facebook access token has an expire date by default, so you have
+to keep that in mind.
+
+For twitter's, it works for life-time unless the user unauthenticates it themselves. To get
+user's access token, you can use [[https://gist.github.com/salehmu/8258039d52efb7958e7e5edad2f2fcd7][dghubble/oauth1]].
+* Usage
+Have a loot at [[file:post][the example post]], maintain a file with the same format with the same file
+name, run the program in the very same directory. And that's it. (the KISS principle)

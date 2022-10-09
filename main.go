@@ -1,19 +1,12 @@
 package main
 
 import (
-	"bytes"
+	"bufio"
 	"encoding/json"
 	"fmt"
-	"io"
 	"io/ioutil"
-	"mime/multipart"
-	"net/url"
 	"os"
-	"strconv"
-
-	// "github.com/dghubble/go-twitter/twitter"
-	"github.com/dghubble/oauth1"
-	fb "github.com/huandu/facebook/v2"
+	"strings"
 )
 
 var token Token
@@ -22,15 +15,61 @@ type MediaUpload struct {
 	MediaId int `json:"media_id"`
 }
 
+// var file string
+var art string
+var caption string
+var (
+	fileName string
+	imageUrl string
+)
+
 func main() {
 	err := ReadToken()
 	if err != nil {
-		fmt.Fprintf(os.Stderr, ErrReadingJson)
+		fmt.Fprintln(os.Stderr, ErrReadingPost)
 		return
 	}
-	PublishTW("file.png")
+	lines, err := ReadLines()
+	if err != nil {
+		fmt.Fprintln(os.Stderr, ErrPostingTW, err)
+		return
+	}
+	imageUrl = lines[0]
+	caption = strings.Join(lines[2:], "\n")
+	art = lines[len(lines)-1]
+	if strings.Contains(art, "Via.") {
+		art = lines[len(lines)-2]
+	}
+	DownloadImage()
+	err = PublishFB()
+	if err != nil {
+		fmt.Fprintln(os.Stderr, ErrPostingFB, err)
+		return
+	}
+	id, err := PublishTW()
+	if err != nil {
+		fmt.Fprintln(os.Stderr, ErrPostingTW, err)
+		return
+	}
+	os.Remove(fileName)
+	imageUrl = lines[1]
+	DownloadImage()
+	_, err = PublishTW(id)
+	os.Remove(fileName)
+	if err != nil {
+		fmt.Fprintln(os.Stderr, ErrPostingTWReply, err)
+		return
+	}
+
+}
+
+func DownloadImage() {
+	buildFileName()
+	file := createFile()
+	putFile(file, httpClient())
 }
 func ReadToken() (err error) {
+
 	jsonFile, err := os.Open(secertFile)
 	if err != nil {
 		return
@@ -40,48 +79,18 @@ func ReadToken() (err error) {
 	json.Unmarshal(values, &token)
 	return
 }
-func PublishFB(image_url, caption string) (err error) {
-	tkn, id := token.FB, token.FBid
-	_, err = fb.Post(id+"/photos", fb.Params{
-		"caption":      "..",
-		"message":      caption,
-		"url":          image_url,
-		"access_token": tkn,
-	})
-	return
-}
-func PublishTW(file string) {
-	config := oauth1.NewConfig(token.TWcon, token.TWconSEC)
-	token := oauth1.NewToken(token.TW, token.TWsec)
-	httpClient := config.Client(oauth1.NoContext, token)
-	b := &bytes.Buffer{}
-	form := multipart.NewWriter(b)
-	fw, err := form.CreateFormFile("media", file)
+
+func ReadLines() ([]string, error) {
+	file, err := os.Open("post")
 	if err != nil {
-		panic(err)
+		return nil, err
 	}
-	opened, err := os.Open("logo.png")
-	if err != nil {
-		panic(err)
+	defer file.Close()
+
+	var lines []string
+	scanner := bufio.NewScanner(file)
+	for scanner.Scan() {
+		lines = append(lines, scanner.Text())
 	}
-	_, err = io.Copy(fw, opened)
-	if err != nil {
-		panic(err)
-	}
-	form.Close()
-	resp, err :=
-		httpClient.Post("https://upload.twitter.com/1.1/media/upload.json?media_category=tweet_image",
-			form.FormDataContentType(), bytes.NewReader(b.Bytes()))
-	if err != nil {
-		fmt.Printf("Error: %s\n", err)
-	}
-	defer resp.Body.Close()
-	m := &MediaUpload{}
-	_ = json.NewDecoder(resp.Body).Decode(m)
-	mid := strconv.Itoa(m.MediaId)
-	resp, err = httpClient.PostForm("https://api.twitter.com/1.1/statuses/update.json",
-		url.Values{"status": {"Post the status!"}, "media_ids": {mid}})
-	if err != nil {
-		fmt.Printf("Error: %s\n", err)
-	}
+	return lines, scanner.Err()
 }
